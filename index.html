@@ -48,6 +48,13 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
+        .total-payment {
+            background-color: #e9ecef;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -117,6 +124,9 @@
         const workerPercentage = 100 - companyPercentage;
         const workerPayment = (remaining * (workerPercentage / 100));
         
+        // Calculate total worker payment including transport
+        const totalWorkerPayment = workerPayment + transport;
+        
         // Company's final share is their original share minus the full discount
         const finalCompanyShare = originalCompanyShare - discountAmount;
 
@@ -126,6 +136,7 @@
         const formattedFinalCompanyShare = finalCompanyShare.toFixed(2);
         const formattedWorkerPayment = workerPayment.toFixed(2);
         const formattedDiscountAmount = discountAmount.toFixed(2);
+        const formattedTotalWorkerPayment = totalWorkerPayment.toFixed(2);
 
         document.getElementById('result').innerHTML = `
             <p><strong>Customer Name:</strong> ${customerName}</p>
@@ -137,7 +148,10 @@
             <p><strong>Discount Amount (${discountPercentage}%):</strong> ₦${formattedDiscountAmount}</p>
             <p><strong>Final Amount Paid by Customer:</strong> ₦${formattedDiscountedTotal}</p>
             <p><strong>Transport Cost:</strong> ₦${transport.toFixed(2)}</p>
-            <p><strong>Worker's Payment:</strong> ₦${formattedWorkerPayment}</p>
+            <p><strong>Worker's Payment (before transport):</strong> ₦${formattedWorkerPayment}</p>
+            <div class="total-payment">
+                <p><strong>Total Worker Payment (including transport):</strong> ₦${formattedTotalWorkerPayment}</p>
+            </div>
             <p><strong>Company's Original Share:</strong> ₦${formattedOriginalCompanyShare}</p>
             <p><strong>Company's Final Share (after discount):</strong> ₦${formattedFinalCompanyShare}</p>
         `;
@@ -152,7 +166,8 @@ Original Service Cost: ₦${servicePrice.toFixed(2)}
 Discount Amount (${discountPercentage}%): ₦${formattedDiscountAmount}
 Final Amount Paid by Customer: ₦${formattedDiscountedTotal}
 Transport Cost: ₦${transport.toFixed(2)}
-Worker's Payment: ₦${formattedWorkerPayment}
+Worker's Payment (before transport): ₦${formattedWorkerPayment}
+Total Worker Payment (including transport): ₦${formattedTotalWorkerPayment}
 Company's Original Share: ₦${formattedOriginalCompanyShare}
 Company's Final Share (after discount): ₦${formattedFinalCompanyShare}
         `;
