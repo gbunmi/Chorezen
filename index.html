@@ -219,8 +219,6 @@
             <label for="discount">Discount (%)</label>
             <input type="number" id="discount" placeholder="Enter discount percentage">
 
-\</script>
-
             <button onclick="calculateAndCreateOrder()">Calculate and Create Order</button>
         </div>
     </div>
@@ -242,7 +240,7 @@
 
             // Activate selected section and menu item
             document.getElementById(sectionName + 'Section').classList.add('active');
-            document.querySelector(`.sidebar-menu li:nth-child(${sectionName === 'orders' ? 1 : 2})`).classList.add('active');
+            document.querySelector(.sidebar-menu li:nth-child(${sectionName === 'orders' ? 1 : 2})).classList.add('active');
         }
 
         // Order Creation
@@ -339,7 +337,7 @@
 
             orders.forEach(order => {
                 const row = tableBody.insertRow();
-                row.innerHTML = `
+                row.innerHTML = 
                     <td>${order.customerName}</td>
                     <td>${order.cleanerName}</td>
                     <td>${order.date}</td>
@@ -352,7 +350,7 @@
                     <td>
                         <button onclick="deleteOrder(${order.id})">Delete</button>
                     </td>
-                `;
+                ;
             });
         }
 
@@ -362,7 +360,7 @@
 
             Object.values(customers).forEach(customer => {
                 const row = tableBody.insertRow();
-                row.innerHTML = `
+                row.innerHTML = 
                     <td>${customer.name}</td>
                     <td>${customer.dateAdded}</td>
                     <td>${customer.orderCount}</td>
@@ -370,14 +368,14 @@
                     <td>
                         <button onclick="viewCustomerDetails('${customer.name}')">View</button>
                     </td>
-                `;
+                ;
             });
         }
 
         function viewCustomerDetails(customerName) {
             const customerOrders = orders.filter(order => order.customerName === customerName);
             
-            let detailsHTML = `<h3>Customer Details: ${customerName}</h3>
+            let detailsHTML = <h3>Customer Details: ${customerName}</h3>
                 <p>Total Orders: ${customerOrders.length}</p>
                 <table>
                     <thead>
@@ -387,19 +385,19 @@
                             <th>Address</th>
                         </tr>
                     </thead>
-                    <tbody>`;
+                    <tbody>;
             
             customerOrders.forEach(order => {
-                detailsHTML += `
+                detailsHTML += 
                     <tr>
                         <td>${order.date}</td>
                         <td>₦${order.servicePrice}</td>
                         <td>${order.address}</td>
                     </tr>
-                `;
+                ;
             });
             
-            detailsHTML += `</tbody></table>`;
+            detailsHTML += </tbody></table>;
             
             alert(detailsHTML);
         }
