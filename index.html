@@ -1,73 +1,449 @@
-// Debug function to check if orders are being populated
-function checkOrderData() {
-    console.log("Total Orders:", orders.length);
-    if (orders.length > 0) {
-        console.log("First Order:", orders[0]);
-    }
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Management App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            background-color: #f4f4f4;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #333;
+            height: 100vh;
+            padding: 20px 0;
+            color: white;
+        }
+        .sidebar-menu {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-menu li {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .sidebar-menu li:hover {
+            background-color: #444;
+        }
+        .sidebar-menu li.active {
+            background-color: #4CAF50;
+        }
+        .main-content {
+            flex-grow: 1;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            margin: 0;
+            background: white;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        input, button {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: auto;
+            padding: 10px 20px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .reset-btn {
+            background-color: #dc3545;
+        }
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            position: relative;
+        }
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-modal:hover {
+            color: black;
+        }
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f2f2f2;
+        }
+        /* Horizontal scrolling for wide tables */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        /* Sections Management */
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <ul class="sidebar-menu">
+            <li onclick="showSection('orders')">Orders</li>
+            <li onclick="showSection('customers')">Customers</li>
+        </ul>
+    </div>
 
-function updateOrdersTable() {
-    const tableBody = document.getElementById('ordersTableBody');
-    tableBody.innerHTML = ''; // Clear existing rows
+    <div class="main-content">
+        <!-- Orders Section -->
+        <div id="ordersSection" class="section">
+            <div class="container">
+                <h2>Orders</h2>
+                <button onclick="openOrderModal()">Add New Order</button>
+                <div class="table-responsive">
+                    <table id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>Cleaner Name</th>
+                                <th>Date</th>
+                                <th>Address</th>
+                                <th>Service Cost</th>
+                                <th>Transport Cost</th>
+                                <th>Company %</th>
+                                <th>Discount %</th>
+                                <th>Total Worker Payment</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <!-- Orders will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-    console.log("Updating orders table. Total orders:", orders.length);
+        <!-- Customers Section -->
+        <div id="customersSection" class="section">
+            <div class="container">
+                <h2>Customers</h2>
+                <div class="table-responsive">
+                    <table id="customersTable">
+                        <thead>
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>Date Added</th>
+                                <th>Number of Orders</th>
+                                <th>Address</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody">
+                            <!-- Customers will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    orders.forEach((order, index) => {
-        const row = tableBody.insertRow();
-        
-        // Add console log to verify each order
-        console.log(`Order ${index}:`, order);
+    <!-- Order Creation Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeOrderModal()">&times;</span>
+            <h2>Create New Order</h2>
 
-        // Add explicit click event listener with debugging
-        row.addEventListener('click', () => {
-            console.log("Row clicked. Order details:", order);
-            showOrderDetails(order);
+            <label for="customerName">Customer Name</label>
+            <input type="text" id="customerName" placeholder="Enter customer name">
+
+            <label for="cleanerName">Cleaner Name</label>
+            <input type="text" id="cleanerName" placeholder="Enter cleaner name">
+
+            <label for="date">Date</label>
+            <input type="date" id="date">
+
+            <label for="address">Customer's Address</label>
+            <input type="text" id="address" placeholder="Enter customer's address">
+
+            <label for="servicePrice">Cost of Service (₦)</label>
+            <input type="number" id="servicePrice" placeholder="Enter service cost">
+
+            <label for="transport">Transport Cost (₦)</label>
+            <input type="number" id="transport" placeholder="Enter transport cost">
+
+            <label for="percentage">Company's Percentage (%)</label>
+            <input type="number" id="percentage" placeholder="Enter company's percentage">
+
+            <label for="discount">Discount (%)</label>
+            <input type="number" id="discount" placeholder="Enter discount percentage">
+
+            <button onclick="calculateAndCreateOrder()">Calculate and Create Order</button>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage
+        let orders = [];
+        let customers = {};
+
+        // Section Management
+        function showSection(sectionName) {
+            // Remove active class from all sections and menu items
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.sidebar-menu li').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Activate selected section and menu item
+            document.getElementById(sectionName + 'Section').classList.add('active');
+            document.querySelector(`.sidebar-menu li:nth-child(${sectionName === 'orders' ? 1 : 2})`).classList.add('active');
+        }
+
+        // Order Creation
+        function openOrderModal() {
+            document.getElementById('orderModal').style.display = 'block';
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').style.display = 'none';
+        }
+
+        function calculateAndCreateOrder() {
+            const customerName = document.getElementById('customerName').value.trim();
+            const cleanerName = document.getElementById('cleanerName').value.trim();
+            const date = document.getElementById('date').value;
+            const address = document.getElementById('address').value.trim();
+            const servicePrice = parseFloat(document.getElementById('servicePrice').value);
+            const transport = parseFloat(document.getElementById('transport').value);
+            const companyPercentage = parseFloat(document.getElementById('percentage').value);
+            const discountPercentage = parseFloat(document.getElementById('discount').value) || 0;
+
+            // Validation
+            if (!customerName || !cleanerName || !date || !address) {
+                alert("Please fill in all required fields.");
+                return;
+            }
+
+            if (isNaN(servicePrice) || isNaN(transport) || isNaN(companyPercentage)) {
+                alert("Please enter valid numbers.");
+                return;
+            }
+
+            // Calculate amounts
+            const discountAmount = (servicePrice * (discountPercentage / 100));
+            const discountedTotal = servicePrice - discountAmount;
+            const remaining = servicePrice - transport;
+            
+            const originalCompanyShare = (remaining * (companyPercentage / 100));
+            const workerPercentage = 100 - companyPercentage;
+            const workerPayment = (remaining * (workerPercentage / 100));
+            const totalWorkerPayment = workerPayment + transport;
+            const finalCompanyShare = originalCompanyShare - discountAmount;
+
+            // Create new order
+            const newOrder = {
+                id: orders.length + 1,
+                customerName,
+                cleanerName,
+                date,
+                address,
+                servicePrice: servicePrice.toFixed(2),
+                transport: transport.toFixed(2),
+                companyPercentage,
+                discountPercentage,
+                totalWorkerPayment: totalWorkerPayment.toFixed(2)
+            };
+
+            // Add to orders array
+            orders.push(newOrder);
+
+            // Update or add customer
+            if (!customers[customerName]) {
+                customers[customerName] = {
+                    name: customerName,
+                    dateAdded: date,
+                    orderCount: 1,
+                    address: address
+                };
+            } else {
+                customers[customerName].orderCount++;
+                // Update address if different
+                if (customers[customerName].address !== address) {
+                    customers[customerName].address = address;
+                }
+            }
+
+            // Update tables
+            updateOrdersTable();
+            updateCustomersTable();
+
+            // Close modal
+            closeOrderModal();
+
+            // Reset form
+            resetOrderForm();
+
+            // Switch to Orders section
+            showSection('orders');
+        }
+
+        function updateOrdersTable() {
+            const tableBody = document.getElementById('ordersTableBody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            orders.forEach(order => {
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td>${order.customerName}</td>
+                    <td>${order.cleanerName}</td>
+                    <td>${order.date}</td>
+                    <td>${order.address}</td>
+                    <td>₦${order.servicePrice}</td>
+                    <td>₦${order.transport}</td>
+                    <td>${order.companyPercentage}%</td>
+                    <td>${order.discountPercentage}%</td>
+                    <td>₦${order.totalWorkerPayment}</td>
+                    <td>
+                        <button onclick="deleteOrder(${order.id})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function updateCustomersTable() {
+            const tableBody = document.getElementById('customersTableBody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            Object.values(customers).forEach(customer => {
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td>${customer.name}</td>
+                    <td>${customer.dateAdded}</td>
+                    <td>${customer.orderCount}</td>
+                    <td>${customer.address}</td>
+                    <td>
+                        <button onclick="viewCustomerDetails('${customer.name}')">View</button>
+                    </td>
+                `;
+            });
+        }
+
+        function viewCustomerDetails(customerName) {
+            const customerOrders = orders.filter(order => order.customerName === customerName);
+            
+            let detailsHTML = `<h3>Customer Details: ${customerName}</h3>
+                <p>Total Orders: ${customerOrders.length}</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Service Cost</th>
+                            <th>Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            
+            customerOrders.forEach(order => {
+                detailsHTML += `
+                    <tr>
+                        <td>${order.date}</td>
+                        <td>₦${order.servicePrice}</td>
+                        <td>${order.address}</td>
+                    </tr>
+                `;
+            });
+            
+            detailsHTML += `</tbody></table>`;
+            
+            alert(detailsHTML);
+        }
+
+        function deleteOrder(id) {
+            const orderToDelete = orders.find(order => order.id === id);
+            
+            if (confirm("Are you sure you want to delete this order?")) {
+                // Reduce order count for the customer
+                if (customers[orderToDelete.customerName]) {
+                    customers[orderToDelete.customerName].orderCount--;
+                    
+                    // Remove customer if no orders left
+                    if (customers[orderToDelete.customerName].orderCount === 0) {
+                        delete customers[orderToDelete.customerName];
+                    }
+                }
+
+                // Remove the order
+                orders = orders.filter(order => order.id !== id);
+                
+                // Update tables
+                updateOrdersTable();
+                updateCustomersTable();
+            }
+        }
+
+        function resetOrderForm() {
+            document.getElementById('customerName').value = '';
+            document.getElementById('cleanerName').value = '';
+            document.getElementById('date').valueAsDate = new Date();
+            document.getElementById('address').value = '';
+            document.getElementById('servicePrice').value = '';
+            document.getElementById('transport').value = '';
+            document.getElementById('percentage').value = '';
+            document.getElementById('discount').value = '';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial date to today
+            document.getElementById('date').valueAsDate = new Date();
+            
+            // Show Orders section by default
+            showSection('orders');
         });
-
-        row.innerHTML = `
-            <td>${order.customerName}</td>
-            <td>${order.cleanerName}</td>
-            <td>${order.date}</td>
-            <td>${order.address}</td>
-            <td>₦${order.servicePrice}</td>
-            <td>₦${order.transport}</td>
-            <td>${order.companyPercentage}%</td>
-            <td>${order.discountPercentage}%</td>
-            <td>₦${order.totalWorkerPayment}</td>
-        `;
-    });
-}
-
-function showOrderDetails(order) {
-    console.log("Show order details called with:", order);
-    
-    const modal = document.getElementById('orderDetailsModal');
-    const content = document.getElementById('orderDetailsContent');
-
-    if (!modal || !content) {
-        console.error("Modal or content element not found!");
-        return;
-    }
-
-    // Simplified details display
-    content.innerHTML = `
-        <h2>Order Details</h2>
-        <p>Customer: ${order.customerName}</p>
-        <p>Cleaner: ${order.cleanerName}</p>
-        <p>Date: ${order.date}</p>
-        <p>Service Price: ₦${order.servicePrice}</p>
-        <p>Total Worker Payment: ₦${order.totalWorkerPayment}</p>
-    `;
-
-    modal.style.display = 'block';
-    console.log("Modal should now be visible");
-}
-
-function closeOrderDetailsModal() {
-    document.getElementById('orderDetailsModal').style.display = 'none';
-}
-
-// Add a debug call to check data on page load
-document.addEventListener('DOMContentLoaded', () => {
-    checkOrderData();
-});
+    </script>
+</body>
+</html>
