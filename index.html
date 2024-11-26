@@ -219,6 +219,84 @@
             <label for="discount">Discount (%)</label>
             <input type="number" id="discount" placeholder="Enter discount percentage">
 
+            <!-- Add this to the body section after the Order Creation Modal -->
+<!-- Order Details Modal -->
+<div id="orderDetailsModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeOrderDetailsModal()">&times;</span>
+        <h2>Order Details</h2>
+        <div id="orderDetailsContent">
+            <!-- Order details will be dynamically populated here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Open Order Details Modal
+    function openOrderDetailsModal(orderId) {
+        const order = orders.find(order => order.id === orderId);
+        if (!order) return;
+
+        // Calculate additional details
+        const discountAmount = (order.servicePrice * (order.discountPercentage / 100));
+        const discountedTotal = order.servicePrice - discountAmount;
+        const remaining = order.servicePrice - order.transport;
+        const companyEarnings = (remaining * (order.companyPercentage / 100)) - discountAmount;
+        const workerEarnings = order.totalWorkerPayment - order.transport;
+
+        // Populate modal content
+        const modalContent = `
+            <p><strong>Customer Name:</strong> ${order.customerName}</p>
+            <p><strong>Cleaner Name:</strong> ${order.cleanerName}</p>
+            <p><strong>Date:</strong> ${order.date}</p>
+            <p><strong>Address:</strong> ${order.address}</p>
+            <p><strong>Service Cost:</strong> ₦${order.servicePrice}</p>
+            <p><strong>Transport Cost:</strong> ₦${order.transport}</p>
+            <p><strong>Company Percentage:</strong> ${order.companyPercentage}%</p>
+            <p><strong>Discount Percentage:</strong> ${order.discountPercentage}%</p>
+            <p><strong>Total Worker Payment:</strong> ₦${order.totalWorkerPayment}</p>
+            <p><strong>Cleaner Earnings:</strong> ₦${workerEarnings.toFixed(2)}</p>
+            <p><strong>Company Earnings:</strong> ₦${companyEarnings.toFixed(2)}</p>
+        `;
+        document.getElementById('orderDetailsContent').innerHTML = modalContent;
+
+        // Display the modal
+        document.getElementById('orderDetailsModal').style.display = 'block';
+    }
+
+    // Close Order Details Modal
+    function closeOrderDetailsModal() {
+        document.getElementById('orderDetailsModal').style.display = 'none';
+    }
+
+    // Update Orders Table to make rows clickable
+    function updateOrdersTable() {
+        const tableBody = document.getElementById('ordersTableBody');
+        tableBody.innerHTML = ''; // Clear existing rows
+
+        orders.forEach(order => {
+            const row = tableBody.insertRow();
+            row.onclick = () => openOrderDetailsModal(order.id); // Make row clickable
+            row.style.cursor = 'pointer'; // Change cursor to indicate clickable
+
+            row.innerHTML = `
+                <td>${order.customerName}</td>
+                <td>${order.cleanerName}</td>
+                <td>${order.date}</td>
+                <td>${order.address}</td>
+                <td>₦${order.servicePrice}</td>
+                <td>₦${order.transport}</td>
+                <td>${order.companyPercentage}%</td>
+                <td>${order.discountPercentage}%</td>
+                <td>₦${order.totalWorkerPayment}</td>
+                <td>
+                    <button onclick="event.stopPropagation(); deleteOrder(${order.id})">Delete</button>
+                </td>
+            `;
+        });
+    }
+</script>
+
             <button onclick="calculateAndCreateOrder()">Calculate and Create Order</button>
         </div>
     </div>
